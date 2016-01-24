@@ -1376,7 +1376,484 @@ describe('DependencyGraph', function() {
     }
 
     function testBrowserField(fieldName) {
-      pit('should support simple browser field in packages ("' + fieldName + '")', function() {
+      // pit('should support simple browser field in packages ("' + fieldName + '")', function() {
+      //   var root = '/root';
+      //   fs.__setMockFilesystem({
+      //     'root': {
+      //       'index.js': [
+      //         '/**',
+      //         ' * @providesModule index',
+      //         ' */',
+      //         'require("aPackage")',
+      //       ].join('\n'),
+      //       'aPackage': {
+      //         'package.json': JSON.stringify(replaceBrowserField({
+      //           name: 'aPackage',
+      //           main: 'main.js',
+      //           browser: 'client.js',
+      //         }, fieldName)),
+      //         'main.js': 'some other code',
+      //         'client.js': 'some code',
+      //       },
+      //     },
+      //   });
+
+      //   var dgraph = new DependencyGraph({
+      //     ...defaults,
+      //     roots: [root],
+      //   });
+      //   return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
+      //     expect(deps)
+      //       .toEqual([
+      //         {
+      //           id: 'index',
+      //           path: '/root/index.js',
+      //           dependencies: ['aPackage'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //           resolveDependency: undefined,
+      //         },
+      //         {
+      //           id: 'aPackage/client.js',
+      //           path: '/root/aPackage/client.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //           resolveDependency: undefined,
+      //         },
+      //       ]);
+      //   });
+      // });
+
+      // pit('should support browser field in packages w/o .js ext ("' + fieldName + '")', function() {
+      //   var root = '/root';
+      //   fs.__setMockFilesystem({
+      //     'root': {
+      //       'index.js': [
+      //         '/**',
+      //         ' * @providesModule index',
+      //         ' */',
+      //         'require("aPackage")',
+      //       ].join('\n'),
+      //       'aPackage': {
+      //         'package.json': JSON.stringify(replaceBrowserField({
+      //           name: 'aPackage',
+      //           main: 'main.js',
+      //           browser: 'client',
+      //         }, fieldName)),
+      //         'main.js': 'some other code',
+      //         'client.js': 'some code',
+      //       },
+      //     },
+      //   });
+
+      //   var dgraph = new DependencyGraph({
+      //     ...defaults,
+      //     roots: [root],
+      //   });
+      //   return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
+      //     expect(deps)
+      //       .toEqual([
+      //         {
+      //           id: 'index',
+      //           path: '/root/index.js',
+      //           dependencies: ['aPackage'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         {
+      //           id: 'aPackage/client.js',
+      //           path: '/root/aPackage/client.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //       ]);
+      //   });
+      // });
+
+      // pit('should support mapping main in browser field json ("' + fieldName + '")', function() {
+      //   var root = '/root';
+      //   fs.__setMockFilesystem({
+      //     'root': {
+      //       'index.js': [
+      //         '/**',
+      //         ' * @providesModule index',
+      //         ' */',
+      //         'require("aPackage")',
+      //       ].join('\n'),
+      //       'aPackage': {
+      //         'package.json': JSON.stringify(replaceBrowserField({
+      //           name: 'aPackage',
+      //           main: './main.js',
+      //           browser: {
+      //             './main.js': './client.js',
+      //           },
+      //         }, fieldName)),
+      //         'main.js': 'some other code',
+      //         'client.js': 'some code',
+      //       },
+      //     },
+      //   });
+
+      //   var dgraph = new DependencyGraph({
+      //     ...defaults,
+      //     roots: [root],
+      //     assetExts: ['png', 'jpg'],
+      //   });
+      //   return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
+      //     expect(deps)
+      //       .toEqual([
+      //         {
+      //           id: 'index',
+      //           path: '/root/index.js',
+      //           dependencies: ['aPackage'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/client.js',
+      //           path: '/root/aPackage/client.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //           resolveDependency: undefined,
+      //         },
+      //       ]);
+      //   });
+      // });
+
+      // pit('should work do correct browser mapping w/o js ext ("' + fieldName + '")', function() {
+      //   var root = '/root';
+      //   fs.__setMockFilesystem({
+      //     'root': {
+      //       'index.js': [
+      //         '/**',
+      //         ' * @providesModule index',
+      //         ' */',
+      //         'require("aPackage")',
+      //       ].join('\n'),
+      //       'aPackage': {
+      //         'package.json': JSON.stringify(replaceBrowserField({
+      //           name: 'aPackage',
+      //           main: './main.js',
+      //           browser: {
+      //             './main': './client.js',
+      //           },
+      //         }, fieldName)),
+      //         'main.js': 'some other code',
+      //         'client.js': 'some code',
+      //       },
+      //     },
+      //   });
+
+      //   var dgraph = new DependencyGraph({
+      //     ...defaults,
+      //     roots: [root],
+      //     assetExts: ['png', 'jpg'],
+      //   });
+      //   return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
+      //     expect(deps)
+      //       .toEqual([
+      //         {
+      //           id: 'index',
+      //           path: '/root/index.js',
+      //           dependencies: ['aPackage'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //           resolveDependency: undefined,
+      //         },
+      //         {
+      //           id: 'aPackage/client.js',
+      //           path: '/root/aPackage/client.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //           resolveDependency: undefined,
+      //         },
+      //       ]);
+      //   });
+      // });
+
+      // pit('should support browser mapping of files ("' + fieldName + '")', function() {
+      //   var root = '/root';
+      //   fs.__setMockFilesystem({
+      //     'root': {
+      //       'index.js': [
+      //         '/**',
+      //         ' * @providesModule index',
+      //         ' */',
+      //         'require("aPackage")',
+      //       ].join('\n'),
+      //       'aPackage': {
+      //         'package.json': JSON.stringify(replaceBrowserField({
+      //           name: 'aPackage',
+      //           main: './main.js',
+      //           browser: {
+      //             './main': './client.js',
+      //             './node.js': './not-node.js',
+      //             './not-browser': './browser.js',
+      //             './dir/server.js': './dir/client',
+      //             './hello.js': './bye.js',
+      //           },
+      //         }, fieldName)),
+      //         'main.js': 'some other code',
+      //         'client.js': 'require("./node")\nrequire("./dir/server.js")',
+      //         'not-node.js': 'require("./not-browser")',
+      //         'not-browser.js': 'require("./dir/server")',
+      //         'browser.js': 'some browser code',
+      //         'dir': {
+      //           'server.js': 'some node code',
+      //           'client.js': 'require("../hello")',
+      //         },
+      //         'hello.js': 'hello',
+      //         'bye.js': 'bye',
+      //       },
+      //     },
+      //   });
+
+      //   const dgraph = new DependencyGraph({
+      //     ...defaults,
+      //     roots: [root],
+      //   });
+      //   return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
+      //     expect(deps)
+      //       .toEqual([
+      //         { id: 'index',
+      //           path: '/root/index.js',
+      //           dependencies: ['aPackage'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/client.js',
+      //           path: '/root/aPackage/client.js',
+      //           dependencies: ['./node', './dir/server.js'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/not-node.js',
+      //           path: '/root/aPackage/not-node.js',
+      //           dependencies: ['./not-browser'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/browser.js',
+      //           path: '/root/aPackage/browser.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         {
+      //           id: 'aPackage/dir/client.js',
+      //           path: '/root/aPackage/dir/client.js',
+      //           dependencies: ['../hello'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         {
+      //           id: 'aPackage/bye.js',
+      //           path: '/root/aPackage/bye.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //       ]);
+      //   });
+      // });
+
+      // pit('should support browser mapping for packages ("' + fieldName + '")', function() {
+      //   var root = '/root';
+      //   fs.__setMockFilesystem({
+      //     'root': {
+      //       'index.js': [
+      //         '/**',
+      //         ' * @providesModule index',
+      //         ' */',
+      //         'require("aPackage")',
+      //       ].join('\n'),
+      //       'aPackage': {
+      //         'package.json': JSON.stringify(replaceBrowserField({
+      //           name: 'aPackage',
+      //           browser: {
+      //             'node-package': 'browser-package',
+      //           },
+      //         }, fieldName)),
+      //         'index.js': 'require("node-package")',
+      //         'node-package': {
+      //           'package.json': JSON.stringify({
+      //             'name': 'node-package',
+      //           }),
+      //           'index.js': 'some node code',
+      //         },
+      //         'browser-package': {
+      //           'package.json': JSON.stringify({
+      //             'name': 'browser-package',
+      //           }),
+      //           'index.js': 'some browser code',
+      //         },
+      //       },
+      //     },
+      //   });
+
+      //   var dgraph = new DependencyGraph({
+      //     ...defaults,
+      //     roots: [root],
+      //   });
+      //   return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
+      //     expect(deps)
+      //       .toEqual([
+      //         { id: 'index',
+      //           path: '/root/index.js',
+      //           dependencies: ['aPackage'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/index.js',
+      //           path: '/root/aPackage/index.js',
+      //           dependencies: ['node-package'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'browser-package/index.js',
+      //           path: '/root/aPackage/browser-package/index.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //       ]);
+      //   });
+      // });
+
+      // pit('should support browser mapping of a package to a file ("' + fieldName + '")', function() {
+      //   var root = '/root';
+      //   fs.__setMockFilesystem({
+      //     'root': {
+      //       'index.js': [
+      //         '/**',
+      //         ' * @providesModule index',
+      //         ' */',
+      //         'require("aPackage")',
+      //       ].join('\n'),
+      //       'aPackage': {
+      //         'package.json': JSON.stringify(replaceBrowserField({
+      //           name: 'aPackage',
+      //           browser: {
+      //             'node-package': './dir/browser.js',
+      //           },
+      //         }, fieldName)),
+      //         'index.js': 'require("./dir/ooga")',
+      //         'dir': {
+      //           'ooga.js': 'require("node-package")',
+      //           'browser.js': 'some browser code',
+      //         },
+      //         'node-package': {
+      //           'package.json': JSON.stringify({
+      //             'name': 'node-package',
+      //           }),
+      //           'index.js': 'some node code',
+      //         },
+      //       },
+      //     },
+      //   });
+
+      //   const dgraph = new DependencyGraph({
+      //     ...defaults,
+      //     roots: [root],
+      //   });
+      //   return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
+      //     expect(deps)
+      //       .toEqual([
+      //         { id: 'index',
+      //           path: '/root/index.js',
+      //           dependencies: ['aPackage'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/index.js',
+      //           path: '/root/aPackage/index.js',
+      //           dependencies: ['./dir/ooga'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/dir/ooga.js',
+      //           path: '/root/aPackage/dir/ooga.js',
+      //           dependencies: ['node-package'],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //         { id: 'aPackage/dir/browser.js',
+      //           path: '/root/aPackage/dir/browser.js',
+      //           dependencies: [],
+      //           isAsset: false,
+      //           isAsset_DEPRECATED: false,
+      //           isJSON: false,
+      //           isPolyfill: false,
+      //           resolution: undefined,
+      //         },
+      //       ]);
+      //   });
+      // });
+
+      pit('should support browser exclude of a package ("' + fieldName + '")', function() {
         var root = '/root';
         fs.__setMockFilesystem({
           'root': {
@@ -1389,248 +1866,17 @@ describe('DependencyGraph', function() {
             'aPackage': {
               'package.json': JSON.stringify(replaceBrowserField({
                 name: 'aPackage',
-                main: 'main.js',
-                browser: 'client.js',
-              }, fieldName)),
-              'main.js': 'some other code',
-              'client.js': 'some code',
-            },
-          },
-        });
-
-        var dgraph = new DependencyGraph({
-          ...defaults,
-          roots: [root],
-        });
-        return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
-          expect(deps)
-            .toEqual([
-              {
-                id: 'index',
-                path: '/root/index.js',
-                dependencies: ['aPackage'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-                resolveDependency: undefined,
-              },
-              {
-                id: 'aPackage/client.js',
-                path: '/root/aPackage/client.js',
-                dependencies: [],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-                resolveDependency: undefined,
-              },
-            ]);
-        });
-      });
-
-      pit('should support browser field in packages w/o .js ext ("' + fieldName + '")', function() {
-        var root = '/root';
-        fs.__setMockFilesystem({
-          'root': {
-            'index.js': [
-              '/**',
-              ' * @providesModule index',
-              ' */',
-              'require("aPackage")',
-            ].join('\n'),
-            'aPackage': {
-              'package.json': JSON.stringify(replaceBrowserField({
-                name: 'aPackage',
-                main: 'main.js',
-                browser: 'client',
-              }, fieldName)),
-              'main.js': 'some other code',
-              'client.js': 'some code',
-            },
-          },
-        });
-
-        var dgraph = new DependencyGraph({
-          ...defaults,
-          roots: [root],
-        });
-        return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
-          expect(deps)
-            .toEqual([
-              {
-                id: 'index',
-                path: '/root/index.js',
-                dependencies: ['aPackage'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              {
-                id: 'aPackage/client.js',
-                path: '/root/aPackage/client.js',
-                dependencies: [],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-            ]);
-        });
-      });
-
-      pit('should support mapping main in browser field json ("' + fieldName + '")', function() {
-        var root = '/root';
-        fs.__setMockFilesystem({
-          'root': {
-            'index.js': [
-              '/**',
-              ' * @providesModule index',
-              ' */',
-              'require("aPackage")',
-            ].join('\n'),
-            'aPackage': {
-              'package.json': JSON.stringify(replaceBrowserField({
-                name: 'aPackage',
-                main: './main.js',
                 browser: {
-                  './main.js': './client.js',
+                  'booga': false,
                 },
               }, fieldName)),
-              'main.js': 'some other code',
-              'client.js': 'some code',
-            },
-          },
-        });
-
-        var dgraph = new DependencyGraph({
-          ...defaults,
-          roots: [root],
-          assetExts: ['png', 'jpg'],
-        });
-        return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
-          expect(deps)
-            .toEqual([
-              {
-                id: 'index',
-                path: '/root/index.js',
-                dependencies: ['aPackage'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
+              'index.js': 'require("booga")',
+              'booga': {
+                'package.json': JSON.stringify({
+                  'name': 'booga',
+                }),
+                'index.js': 'some node code',
               },
-              { id: 'aPackage/client.js',
-                path: '/root/aPackage/client.js',
-                dependencies: [],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-                resolveDependency: undefined,
-              },
-            ]);
-        });
-      });
-
-      pit('should work do correct browser mapping w/o js ext ("' + fieldName + '")', function() {
-        var root = '/root';
-        fs.__setMockFilesystem({
-          'root': {
-            'index.js': [
-              '/**',
-              ' * @providesModule index',
-              ' */',
-              'require("aPackage")',
-            ].join('\n'),
-            'aPackage': {
-              'package.json': JSON.stringify(replaceBrowserField({
-                name: 'aPackage',
-                main: './main.js',
-                browser: {
-                  './main': './client.js',
-                },
-              }, fieldName)),
-              'main.js': 'some other code',
-              'client.js': 'some code',
-            },
-          },
-        });
-
-        var dgraph = new DependencyGraph({
-          ...defaults,
-          roots: [root],
-          assetExts: ['png', 'jpg'],
-        });
-        return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
-          expect(deps)
-            .toEqual([
-              {
-                id: 'index',
-                path: '/root/index.js',
-                dependencies: ['aPackage'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-                resolveDependency: undefined,
-              },
-              {
-                id: 'aPackage/client.js',
-                path: '/root/aPackage/client.js',
-                dependencies: [],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-                resolveDependency: undefined,
-              },
-            ]);
-        });
-      });
-
-      pit('should support browser mapping of files ("' + fieldName + '")', function() {
-        var root = '/root';
-        fs.__setMockFilesystem({
-          'root': {
-            'index.js': [
-              '/**',
-              ' * @providesModule index',
-              ' */',
-              'require("aPackage")',
-            ].join('\n'),
-            'aPackage': {
-              'package.json': JSON.stringify(replaceBrowserField({
-                name: 'aPackage',
-                main: './main.js',
-                browser: {
-                  './main': './client.js',
-                  './node.js': './not-node.js',
-                  './not-browser': './browser.js',
-                  './dir/server.js': './dir/client',
-                  './hello.js': './bye.js',
-                },
-              }, fieldName)),
-              'main.js': 'some other code',
-              'client.js': 'require("./node")\nrequire("./dir/server.js")',
-              'not-node.js': 'require("./not-browser")',
-              'not-browser.js': 'require("./dir/server")',
-              'browser.js': 'some browser code',
-              'dir': {
-                'server.js': 'some node code',
-                'client.js': 'require("../hello")',
-              },
-              'hello.js': 'hello',
-              'bye.js': 'bye',
             },
           },
         });
@@ -1651,119 +1897,9 @@ describe('DependencyGraph', function() {
                 isPolyfill: false,
                 resolution: undefined,
               },
-              { id: 'aPackage/client.js',
-                path: '/root/aPackage/client.js',
-                dependencies: ['./node', './dir/server.js'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              { id: 'aPackage/not-node.js',
-                path: '/root/aPackage/not-node.js',
-                dependencies: ['./not-browser'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              { id: 'aPackage/browser.js',
-                path: '/root/aPackage/browser.js',
-                dependencies: [],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              {
-                id: 'aPackage/dir/client.js',
-                path: '/root/aPackage/dir/client.js',
-                dependencies: ['../hello'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              {
-                id: 'aPackage/bye.js',
-                path: '/root/aPackage/bye.js',
-                dependencies: [],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-            ]);
-        });
-      });
-
-      pit('should support browser mapping for packages ("' + fieldName + '")', function() {
-        var root = '/root';
-        fs.__setMockFilesystem({
-          'root': {
-            'index.js': [
-              '/**',
-              ' * @providesModule index',
-              ' */',
-              'require("aPackage")',
-            ].join('\n'),
-            'aPackage': {
-              'package.json': JSON.stringify(replaceBrowserField({
-                name: 'aPackage',
-                browser: {
-                  'node-package': 'browser-package',
-                },
-              }, fieldName)),
-              'index.js': 'require("node-package")',
-              'node-package': {
-                'package.json': JSON.stringify({
-                  'name': 'node-package',
-                }),
-                'index.js': 'some node code',
-              },
-              'browser-package': {
-                'package.json': JSON.stringify({
-                  'name': 'browser-package',
-                }),
-                'index.js': 'some browser code',
-              },
-            },
-          },
-        });
-
-        var dgraph = new DependencyGraph({
-          ...defaults,
-          roots: [root],
-        });
-        return getOrderedDependenciesAsJSON(dgraph, '/root/index.js').then(function(deps) {
-          expect(deps)
-            .toEqual([
-              { id: 'index',
-                path: '/root/index.js',
-                dependencies: ['aPackage'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
               { id: 'aPackage/index.js',
                 path: '/root/aPackage/index.js',
-                dependencies: ['node-package'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              { id: 'browser-package/index.js',
-                path: '/root/aPackage/browser-package/index.js',
-                dependencies: [],
+                dependencies: ['booga'],
                 isAsset: false,
                 isAsset_DEPRECATED: false,
                 isJSON: false,
@@ -1774,7 +1910,7 @@ describe('DependencyGraph', function() {
         });
       });
 
-      pit('should support browser mapping of a package to a file ("' + fieldName + '")', function() {
+      pit('should support browser exclude of a file ("' + fieldName + '")', function() {
         var root = '/root';
         fs.__setMockFilesystem({
           'root': {
@@ -1788,20 +1924,11 @@ describe('DependencyGraph', function() {
               'package.json': JSON.stringify(replaceBrowserField({
                 name: 'aPackage',
                 browser: {
-                  'node-package': './dir/browser.js',
+                  './booga.js': false,
                 },
               }, fieldName)),
-              'index.js': 'require("./dir/ooga")',
-              'dir': {
-                'ooga.js': 'require("node-package")',
-                'browser.js': 'some browser code',
-              },
-              'node-package': {
-                'package.json': JSON.stringify({
-                  'name': 'node-package',
-                }),
-                'index.js': 'some node code',
-              },
+              'index.js': 'require("./booga")',
+              'booga.js': 'some node code',
             },
           },
         });
@@ -1824,25 +1951,7 @@ describe('DependencyGraph', function() {
               },
               { id: 'aPackage/index.js',
                 path: '/root/aPackage/index.js',
-                dependencies: ['./dir/ooga'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              { id: 'aPackage/dir/ooga.js',
-                path: '/root/aPackage/dir/ooga.js',
-                dependencies: ['node-package'],
-                isAsset: false,
-                isAsset_DEPRECATED: false,
-                isJSON: false,
-                isPolyfill: false,
-                resolution: undefined,
-              },
-              { id: 'aPackage/dir/browser.js',
-                path: '/root/aPackage/dir/browser.js',
-                dependencies: [],
+                dependencies: ['./booga'],
                 isAsset: false,
                 isAsset_DEPRECATED: false,
                 isJSON: false,

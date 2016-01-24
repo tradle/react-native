@@ -270,10 +270,14 @@ class ResolutionRequest {
         path.join(path.dirname(fromModule.path), toModuleName);
 
     return this._redirectRequire(fromModule, potentialModulePath).then(
-      realModuleName => this._tryResolve(
-        () => this._loadAsFile(realModuleName, fromModule, toModuleName),
-        () => this._loadAsDir(realModuleName, fromModule, toModuleName)
-      )
+      realModuleName => {
+        if (realModuleName === false) return
+
+        return this._tryResolve(
+          () => this._loadAsFile(realModuleName, fromModule, toModuleName),
+          () => this._loadAsDir(realModuleName, fromModule, toModuleName)
+        )
+      }
     );
   }
 
@@ -283,6 +287,9 @@ class ResolutionRequest {
     } else {
       return this._redirectRequire(fromModule, toModuleName).then(
         realModuleName => {
+          // exclude
+          if (realModuleName === false) return
+
           if (realModuleName[0] === '.' || realModuleName[1] === '/') {
             // derive absolute path /.../node_modules/fromModuleDir/realModuleName
             let fromModuleParentIdx = fromModule.path.lastIndexOf('node_modules/') + 13
