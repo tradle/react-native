@@ -13,6 +13,8 @@
  */
 'use strict';
 
+import type { AsyncStorageBackend } from './AsyncStorageTypes'
+
 const NativeModules = require('NativeModules');
 
 // Use RocksDB if available, then SQLite, then file storage.
@@ -22,19 +24,19 @@ const RCTAsyncStorage = NativeModules.AsyncRocksDBStorage ||
 
 /**
  * `AsyncStorage` is a simple, unencrypted, asynchronous, persistent, key-value
- * storage system that is global to the app.  It should be used instead of 
+ * storage system that is global to the app.  It should be used instead of
  * LocalStorage.
- * 
+ *
  * See http://facebook.github.io/react-native/docs/asyncstorage.html
  */
-var AsyncStorage = {
+const AsyncStorage = {
   _getRequests: ([]: Array<any>),
   _getKeys: ([]: Array<string>),
   _immediate: (null: ?number),
 
   /**
    * Fetches an item for a `key` and invokes a callback upon completion.
-   * 
+   *
    * See http://facebook.github.io/react-native/docs/asyncstorage.html#getitem
    */
   getItem: function(
@@ -58,7 +60,7 @@ var AsyncStorage = {
 
   /**
    * Sets the value for a `key` and invokes a callback upon completion.
-   * 
+   *
    * See http://facebook.github.io/react-native/docs/asyncstorage.html#setitem
    */
   setItem: function(
@@ -81,7 +83,7 @@ var AsyncStorage = {
 
   /**
    * Removes an item for a `key` and invokes a callback upon completion.
-   * 
+   *
    * See http://facebook.github.io/react-native/docs/asyncstorage.html#removeitem
    */
   removeItem: function(
@@ -102,36 +104,10 @@ var AsyncStorage = {
   },
 
   /**
-   * Merges an existing `key` value with an input value, assuming both values
-   * are stringified JSON.
-   *
-   * **NOTE:** This is not supported by all native implementations.
-   *
-   * See http://facebook.github.io/react-native/docs/asyncstorage.html#mergeitem
-   */
-  mergeItem: function(
-    key: string,
-    value: string,
-    callback?: ?(error: ?Error) => void
-  ): Promise {
-    return new Promise((resolve, reject) => {
-      RCTAsyncStorage.multiMerge([[key,value]], function(errors) {
-        var errs = convertErrors(errors);
-        callback && callback(errs && errs[0]);
-        if (errs) {
-          reject(errs[0]);
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  },
-
-  /**
-   * Erases *all* `AsyncStorage` for all clients, libraries, etc. You probably
+   * Erases *all* `AsyncStorage` for all clients, libraries, etc.  You probably
    * don't want to call this; use `removeItem` or `multiRemove` to clear only
    * your app's keys.
-   * 
+   *
    * See http://facebook.github.io/react-native/docs/asyncstorage.html#clear
    */
   clear: function(callback?: ?(error: ?Error) => void): Promise {
@@ -175,9 +151,9 @@ var AsyncStorage = {
    * indicate which key caused the error.
    */
 
-  /** 
+  /**
    * Flushes any pending requests using a single batch call to get the data.
-   * 
+   *
    * See http://facebook.github.io/react-native/docs/asyncstorage.html#flushgetrequests
    * */
   flushGetRequests: function(): void {
@@ -211,7 +187,7 @@ var AsyncStorage = {
    * This allows you to batch the fetching of items given an array of `key`
    * inputs. Your callback will be invoked with an array of corresponding
    * key-value pairs found.
-   * 
+   *
    * See http://facebook.github.io/react-native/docs/asyncstorage.html#multiget
    */
   multiGet: function(
@@ -275,7 +251,7 @@ var AsyncStorage = {
 
   /**
    * Call this to batch the deletion of all keys in the `keys` array.
-   * 
+   *
    * See http://facebook.github.io/react-native/docs/asyncstorage.html#multiremove
    */
   multiRemove: function(
@@ -295,36 +271,149 @@ var AsyncStorage = {
     });
   },
 
-  /**
-   * Batch operation to merge in existing and new values for a given set of
-   * keys. This assumes that the values are stringified JSON.
-   * 
-   * **NOTE**: This is not supported by all native implementations.
-   * 
-   * See http://facebook.github.io/react-native/docs/asyncstorage.html#multimerge
-   */
-  multiMerge: function(
-    keyValuePairs: Array<Array<string>>,
-    callback?: ?(errors: ?Array<Error>) => void
-  ): Promise {
-    return new Promise((resolve, reject) => {
-      RCTAsyncStorage.multiMerge(keyValuePairs, function(errors) {
-        var error = convertErrors(errors);
-        callback && callback(error);
-        if (error) {
-          reject(error);
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  },
+  setBackend: function (
+    backend: AsyncStorageBackend
+  ) {
+    RCTAsyncStorage = backend
+    // Not all native implementations support merge.
+    if (backend.multiMerge) {
+      AsyncStorage.mergeItem = mergeItem;
+      AsyncStorage.multiMerge = multiMerge;
+    } else {
+      delete AsyncStorage.mergeItem;
+      delete AsyncStorage.multiMerge;
+    }
+  }
 };
 
-// Not all native implementations support merge.
-if (!RCTAsyncStorage.multiMerge) {
-  delete AsyncStorage.mergeItem;
-  delete AsyncStorage.multiMerge;
+AsyncStorage.setBackend(RCTAsyncStorage);
+
+/**
+ * Batch operation to merge in existing and new values for a given set of
+ * keys. This assumes that the values are stringified JSON. Returns a
+ * `Promise` object.
+ *
+ * **NOTE**: This is not supported by all native implementations.
+ *
+ * @param keyValuePairs Array of key-value array for the items to merge.
+ * @param callback Function that will be called with an array of any
+ *    key-specific errors found.
+ * @returns A `Promise` object.
+ *
+ * @example <caption>Example</caption>
+ * // first user, initial values
+ * let UID234_object = {
+ *  name: 'Chris',
+ *  age: 30,
+ *  traits: {hair: 'brown', eyes: 'brown'},
+ * };
+ *
+ * // first user, delta values
+ * let UID234_delta = {
+ *  age: 31,
+ *  traits: {eyes: 'blue', shoe_size: 10},
+ * };
+ *
+ * // second user, initial values
+ * let UID345_object = {
+ *  name: 'Marge',
+ *  age: 25,
+ *  traits: {hair: 'blonde', eyes: 'blue'},
+ * };
+ *
+ * // second user, delta values
+ * let UID345_delta = {
+ *  age: 26,
+ *  traits: {eyes: 'green', shoe_size: 6},
+ * };
+ *
+ * let multi_set_pairs   = [['UID234', JSON.stringify(UID234_object)], ['UID345', JSON.stringify(UID345_object)]]
+ * let multi_merge_pairs = [['UID234', JSON.stringify(UID234_delta)], ['UID345', JSON.stringify(UID345_delta)]]
+ *
+ * AsyncStorage.multiSet(multi_set_pairs, (err) => {
+ *   AsyncStorage.multiMerge(multi_merge_pairs, (err) => {
+ *     AsyncStorage.multiGet(['UID234','UID345'], (err, stores) => {
+ *       stores.map( (result, i, store) => {
+ *         let key = store[i][0];
+ *         let val = store[i][1];
+ *         console.log(key, val);
+ *       });
+ *     });
+ *   });
+ * });
+ *
+ * // Console log results:
+ * // => UID234 {"name":"Chris","age":31,"traits":{"shoe_size":10,"hair":"brown","eyes":"blue"}}
+ * // => UID345 {"name":"Marge","age":26,"traits":{"shoe_size":6,"hair":"blonde","eyes":"green"}}
+ */
+function multiMerge (
+  keyValuePairs: Array<Array<string>>,
+  callback?: ?(errors: ?Array<Error>) => void
+): Promise {
+  return new Promise((resolve, reject) => {
+    RCTAsyncStorage.multiMerge(keyValuePairs, function(errors) {
+      var error = convertErrors(errors);
+      callback && callback(error);
+      if (error) {
+        reject(error);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+/**
+ * Merges an existing `key` value with an input value, assuming both values
+ * are stringified JSON. Returns a `Promise` object.
+ *
+ * **NOTE:** This is not supported by all native implementations.
+ *
+ * @param key Key of the item to modify.
+ * @param value New value to merge for the `key`.
+ * @param callback Function that will be called with any error.
+ * @returns A `Promise` object.
+ *
+ * @example <caption>Example</caption>
+ * let UID123_object = {
+ *  name: 'Chris',
+ *  age: 30,
+ *  traits: {hair: 'brown', eyes: 'brown'},
+ * };
+ * // You only need to define what will be added or updated
+ * let UID123_delta = {
+ *  age: 31,
+ *  traits: {eyes: 'blue', shoe_size: 10}
+ * };
+ *
+ * AsyncStorage.setItem('UID123', JSON.stringify(UID123_object), () => {
+ *   AsyncStorage.mergeItem('UID123', JSON.stringify(UID123_delta), () => {
+ *     AsyncStorage.getItem('UID123', (err, result) => {
+ *       console.log(result);
+ *     });
+ *   });
+ * });
+ *
+ * // Console log result:
+ * // => {'name':'Chris','age':31,'traits':
+ * //    {'shoe_size':10,'hair':'brown','eyes':'blue'}}
+ */
+function mergeItem(
+  key: string,
+  value: string,
+  callback?: ?(error: ?Error) => void
+): Promise {
+  return new Promise((resolve, reject) => {
+    RCTAsyncStorage.multiMerge([[key,value]], function(errors) {
+      var errs = convertErrors(errors);
+      callback && callback(errs && errs[0]);
+      if (errs) {
+        reject(errs[0]);
+      } else {
+        resolve(null);
+      }
+    });
+  });
 }
 
 function convertErrors(errs) {
