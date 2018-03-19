@@ -8,7 +8,7 @@ import android.os.Build;
 
 public class AndroidInfoHelpers {
 
-  public static final String EMULATOR_LOCALHOST = "10.0.2.2";
+  public static final String EMULATOR_LOCALHOST = "localhost";
   public static final String GENYMOTION_LOCALHOST = "10.0.3.2";
   public static final String DEVICE_LOCALHOST = "localhost";
 
